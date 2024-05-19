@@ -1,3 +1,7 @@
+// ==UserScript==
+// @name        NewScript-tr878m3u
+// @description This is your new file, start writing code
+// @match       *://*/*
 (function() {
     function applyStyles() {
         console.log('Applying styles function called');
@@ -26,3 +30,4 @@
         document.addEventListener('DOMContentLoaded', applyStyles);
     }
 })();
+// ==/UserScript==
