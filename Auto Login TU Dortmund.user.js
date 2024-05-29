@@ -8,12 +8,11 @@
 // @icon         https://www.tu-dortmund.de/storages/administration/_processed_/4/7/csm_favicon-600x600_ccc9d33448.png
 // @grant        none
 // ==/UserScript==
-
 (function() {
     'use strict';
 
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Document loaded and script executing');
+        console.log('Script executing on:', window.location.href);
 
         // Function to prompt for credentials
         function promptForCredentials() {
@@ -37,19 +36,30 @@
             promptForCredentials();
         }
 
-        console.log('Current URL:', window.location.href);
-
-        if (window.location.href === "https://moodle.tu-dortmund.de/login/index.php") {
-            console.log('On Moodle login page, clicking primary button');
-            let loginButton = document.getElementsByClassName("btn-primary")[0];
+        // Handle Moodle homepage and redirect to login
+        if (window.location.href === "https://moodle.tu-dortmund.de/?redirect=0") {
+            console.log('On Moodle homepage, clicking login button');
+            let loginButton = document.querySelector('a.btn-login');
             if (loginButton) {
                 loginButton.click();
             } else {
-                console.log('Login button not found on Moodle login page');
+                console.log('Login button not found on Moodle homepage');
             }
         }
 
-        if (window.location.href.startsWith("https://sso.itmc.tu-dortmund.de/openam/XUI/?goto=https%3A%2F%2Fmoodle.tu-dortmund.de%2Flogin")) {
+        // Handle Moodle login page and redirect to SSO
+        if (window.location.href === "https://moodle.tu-dortmund.de/login/index.php") {
+            console.log('On Moodle login page, clicking UniAccount login button');
+            let uniAccountButton = document.querySelector('.btn-primary');
+            if (uniAccountButton) {
+                uniAccountButton.click();
+            } else {
+                console.log('UniAccount login button not found on Moodle login page');
+            }
+        }
+
+        // Handle SSO login page
+        if (window.location.href.startsWith("https://sso.itmc.tu-dortmund.de/openam/XUI/?realm=/tudo&goto=")) {
             console.log('On SSO login page');
             var loginInterval = setInterval(function() {
                 const userField = document.getElementById('idToken1');
@@ -68,7 +78,7 @@
 
                     if (userField.value !== "" && passField.value !== "") {
                         console.log('Both fields filled, clicking login button');
-                        let ssoLoginButton = document.getElementsByClassName("btn-primary")[0];
+                        let ssoLoginButton = document.querySelector('.btn-primary');
                         if (ssoLoginButton) {
                             ssoLoginButton.click();
                         } else {
