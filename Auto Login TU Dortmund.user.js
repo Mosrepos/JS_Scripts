@@ -71,8 +71,8 @@
         if (window.location.href.startsWith("https://sso.itmc.tu-dortmund.de/openam/XUI/?realm=/tudo&goto=")) {
             console.log('On SSO login page');
             var loginInterval = setInterval(function() {
-                const userField = document.getElementById('idToken1');
-                const passField = document.getElementById('idToken2');
+                const userField = document.querySelector('#idToken1');
+                const passField = document.querySelector('#idToken2');
 
                 console.log('Username field:', userField);
                 console.log('Password field:', passField);
