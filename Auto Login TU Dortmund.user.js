@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Auto Login TU Dortmund
+// @name         MoodleLoginTU
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  Script to auto login into moodle of the TU Dortmund
