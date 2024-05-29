@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        NewScript-tr878m3u
+// @name        WiderMoodle
 // @description This is your new file, start writing code
 // @match       *://*/*
 // ==/UserScript==
