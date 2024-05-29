@@ -11,10 +11,10 @@
 (function() {
     'use strict';
 
-    console.log('MoodleLoginTU script loaded');
+    console.log('MoodleLoginTU script loaded'); // Basic log to check if the script runs
 
     function handlePageLoad() {
-        console.log('Page loaded');
+        console.log('Page load handled');
 
         // Function to prompt for credentials
         function promptForCredentials() {
@@ -111,5 +111,10 @@
 
     // Use both DOMContentLoaded and window.onload to ensure the script runs
     document.addEventListener('DOMContentLoaded', handlePageLoad);
-    window.onload = handlePageLoad;
+    window.addEventListener('load', handlePageLoad);
+
+    // Check if the page is already loaded
+    if (document.readyState === 'complete') {
+        handlePageLoad();
+    }
 })();
