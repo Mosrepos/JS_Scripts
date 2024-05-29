@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MoodleLoginTU
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Script to auto login into Moodle of the TU Dortmund
 // @match        https://moodle.tu-dortmund.de/*
 // @match        https://sso.itmc.tu-dortmund.de/*
@@ -13,7 +13,7 @@
 
     console.log('MoodleLoginTU script loaded'); // Basic log to check if the script runs
 
-    window.onload = function() {
+    function handlePageLoad() {
         console.log('Window fully loaded');
 
         // Function to prompt for credentials
@@ -41,39 +41,52 @@
         // Log current URL
         console.log('Current URL:', window.location.href);
 
+        // Function to observe element availability and interact with it
+        function observeElement(selector, callback) {
+            const targetNode = document.body;
+            const config = { childList: true, subtree: true };
+
+            const observer = new MutationObserver((mutationsList, observer) => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    observer.disconnect();
+                    callback(element);
+                }
+            });
+
+            observer.observe(targetNode, config);
+
+            // Check if element already exists
+            const element = document.querySelector(selector);
+            if (element) {
+                observer.disconnect();
+                callback(element);
+            }
+        }
+
         // Handle Moodle homepage and redirect to login
         if (window.location.href.includes("https://moodle.tu-dortmund.de/?redirect=0")) {
             console.log('On Moodle homepage, looking for login button');
-            let loginButton = document.querySelector('#usernavigation > div.d-flex.align-items-stretch.usermenu-container > div > span > a');
-            console.log('Login button:', loginButton);
-            if (loginButton) {
+            observeElement('#usernavigation > div.d-flex.align-items-stretch.usermenu-container > div > span > a', (loginButton) => {
                 console.log('Login button found, clicking it');
                 loginButton.click();
-            } else {
-                console.log('Login button not found on Moodle homepage');
-            }
+            });
         }
 
         // Handle Moodle login page and redirect to SSO
         if (window.location.href.includes("https://moodle.tu-dortmund.de/login/index.php")) {
             console.log('On Moodle login page, looking for UniAccount login button');
-            let uniAccountButton = document.querySelector('#region-main > div > div > div > div > div:nth-child(2) > p:nth-child(3) > a');
-            console.log('UniAccount login button:', uniAccountButton);
-            if (uniAccountButton) {
+            observeElement('#region-main > div > div > div > div > div:nth-child(2) > p:nth-child(3) > a', (uniAccountButton) => {
                 console.log('UniAccount login button found, clicking it');
                 uniAccountButton.click();
-            } else {
-                console.log('UniAccount login button not found on Moodle login page');
-            }
+            });
         }
 
         // Handle SSO login page
         if (window.location.href.startsWith("https://sso.itmc.tu-dortmund.de/openam/XUI/?realm=/tudo&goto=")) {
             console.log('On SSO login page');
-            var loginInterval = setInterval(function() {
-                const userField = document.querySelector('#idToken1');
+            observeElement('#idToken1', (userField) => {
                 const passField = document.querySelector('#idToken2');
-
                 console.log('Username field:', userField);
                 console.log('Password field:', passField);
 
@@ -90,20 +103,18 @@
 
                     if (userField.value !== "" && passField.value !== "") {
                         console.log('Both fields filled, looking for login button');
-                        let ssoLoginButton = document.querySelector('#loginButton_0');
-                        console.log('SSO login button:', ssoLoginButton);
-                        if (ssoLoginButton) {
-                            console.log('Login button found, clicking it');
+                        observeElement('#loginButton_0', (ssoLoginButton) => {
+                            console.log('SSO login button found, clicking it');
                             ssoLoginButton.click();
-                        } else {
-                            console.log('Login button not found on SSO login page');
-                        }
-                        clearInterval(loginInterval);
+                        });
                     }
                 } else {
                     console.log('Username or password field not found');
                 }
-            }, 100);
+            });
         }
-    };
+    }
+
+    // Use window.onload to ensure the script runs after the entire page has loaded
+    window.onload = handlePageLoad;
 })();
