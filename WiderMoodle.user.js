@@ -5,8 +5,6 @@
 // ==/UserScript==
 (function() {
     function applyStyles() {
-        console.log('Applying styles function called');
-
         var mainInnerElements = document.querySelectorAll('.main-inner');
         if (mainInnerElements.length === 0) {
         } else {
