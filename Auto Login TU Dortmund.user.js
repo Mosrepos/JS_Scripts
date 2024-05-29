@@ -4,7 +4,8 @@
 // @version      0.1
 // @description  Script to auto login into moodle of the TU Dortmund
 // @author       Mohamad Abdo
-// @match        https://*.tu-dortmund.de/*
+// @match        https://moodle.tu-dortmund.de/*
+// @match        https://sso.itmc.tu-dortmund.de/*
 // @grant        none
 // ==/UserScript==
 (function() {
