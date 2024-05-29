@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MoodleLoginTU
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5
 // @description  Script to auto login into Moodle of the TU Dortmund
 // @match        https://moodle.tu-dortmund.de/*
 // @match        https://sso.itmc.tu-dortmund.de/*
@@ -11,10 +11,10 @@
 (function() {
     'use strict';
 
-    console.log('MoodleLoginTU script loaded'); // Basic log to check if the script runs
+    console.log('MoodleLoginTU script loaded');
 
     function handlePageLoad() {
-        console.log('Window fully loaded');
+        console.log('Page loaded');
 
         // Function to prompt for credentials
         function promptForCredentials() {
@@ -41,33 +41,27 @@
         // Log current URL
         console.log('Current URL:', window.location.href);
 
-        // Function to observe element availability and interact with it
-        function observeElement(selector, callback) {
-            const targetNode = document.body;
-            const config = { childList: true, subtree: true };
-
-            const observer = new MutationObserver((mutationsList, observer) => {
-                const element = document.querySelector(selector);
-                if (element) {
-                    observer.disconnect();
-                    callback(element);
-                }
-            });
-
-            observer.observe(targetNode, config);
-
-            // Check if element already exists
+        // Function to interact with element when it becomes available
+        function waitForElement(selector, callback) {
             const element = document.querySelector(selector);
             if (element) {
-                observer.disconnect();
                 callback(element);
+            } else {
+                const observer = new MutationObserver((mutationsList, observer) => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        observer.disconnect();
+                        callback(element);
+                    }
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
             }
         }
 
         // Handle Moodle homepage and redirect to login
         if (window.location.href.includes("https://moodle.tu-dortmund.de/?redirect=0")) {
             console.log('On Moodle homepage, looking for login button');
-            observeElement('#usernavigation > div.d-flex.align-items-stretch.usermenu-container > div > span > a', (loginButton) => {
+            waitForElement('#usernavigation > div.d-flex.align-items-stretch.usermenu-container > div > span > a', (loginButton) => {
                 console.log('Login button found, clicking it');
                 loginButton.click();
             });
@@ -76,7 +70,7 @@
         // Handle Moodle login page and redirect to SSO
         if (window.location.href.includes("https://moodle.tu-dortmund.de/login/index.php")) {
             console.log('On Moodle login page, looking for UniAccount login button');
-            observeElement('#region-main > div > div > div > div > div:nth-child(2) > p:nth-child(3) > a', (uniAccountButton) => {
+            waitForElement('#region-main > div > div > div > div > div:nth-child(2) > p:nth-child(3) > a', (uniAccountButton) => {
                 console.log('UniAccount login button found, clicking it');
                 uniAccountButton.click();
             });
@@ -85,7 +79,7 @@
         // Handle SSO login page
         if (window.location.href.startsWith("https://sso.itmc.tu-dortmund.de/openam/XUI/?realm=/tudo&goto=")) {
             console.log('On SSO login page');
-            observeElement('#idToken1', (userField) => {
+            waitForElement('#idToken1', (userField) => {
                 const passField = document.querySelector('#idToken2');
                 console.log('Username field:', userField);
                 console.log('Password field:', passField);
@@ -103,7 +97,7 @@
 
                     if (userField.value !== "" && passField.value !== "") {
                         console.log('Both fields filled, looking for login button');
-                        observeElement('#loginButton_0', (ssoLoginButton) => {
+                        waitForElement('#loginButton_0', (ssoLoginButton) => {
                             console.log('SSO login button found, clicking it');
                             ssoLoginButton.click();
                         });
@@ -115,6 +109,7 @@
         }
     }
 
-    // Use window.onload to ensure the script runs after the entire page has loaded
+    // Use both DOMContentLoaded and window.onload to ensure the script runs
+    document.addEventListener('DOMContentLoaded', handlePageLoad);
     window.onload = handlePageLoad;
 })();
