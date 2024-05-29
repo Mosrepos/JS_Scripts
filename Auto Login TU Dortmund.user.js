@@ -5,7 +5,6 @@
 // @description  Script to auto login into moodle of the TU Dortmund
 // @author       Mohamad Abdo
 // @match        https://*.tu-dortmund.de/*
-// @icon         https://www.tu-dortmund.de/storages/administration/_processed_/4/7/csm_favicon-600x600_ccc9d33448.png
 // @grant        none
 // ==/UserScript==
 (function() {
