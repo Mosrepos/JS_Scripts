@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MoodleLoginTU
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.6
 // @description  Script to auto login into Moodle of the TU Dortmund
 // @match        https://moodle.tu-dortmund.de/*
 // @match        https://sso.itmc.tu-dortmund.de/*
@@ -30,8 +30,13 @@
         }
 
         // Retrieve credentials from local storage
-        const username = localStorage.getItem('tuDortmundUsername');
-        const password = localStorage.getItem('tuDortmundPassword');
+        function getCredentials() {
+            const username = localStorage.getItem('tuDortmundUsername');
+            const password = localStorage.getItem('tuDortmundPassword');
+            return { username, password };
+        }
+
+        const { username, password } = getCredentials();
 
         // If credentials are not stored, prompt for them
         if (!username || !password) {
@@ -86,21 +91,23 @@
 
                 if (userField && passField) {
                     console.log('Found username and password fields');
-                    if (userField.value === "") {
+                    if (username && password) {
                         userField.value = username;
                         console.log('Filled in username');
-                    }
-                    if (passField.value === "") {
                         passField.value = password;
                         console.log('Filled in password');
-                    }
 
-                    if (userField.value !== "" && passField.value !== "") {
+                        // Trigger change events to ensure the values are recognized by the page
+                        userField.dispatchEvent(new Event('input', { bubbles: true }));
+                        passField.dispatchEvent(new Event('input', { bubbles: true }));
+
                         console.log('Both fields filled, looking for login button');
                         waitForElement('#loginButton_0', (ssoLoginButton) => {
                             console.log('SSO login button found, clicking it');
                             ssoLoginButton.click();
                         });
+                    } else {
+                        console.log('Credentials not found in local storage');
                     }
                 } else {
                     console.log('Username or password field not found');
