@@ -13,8 +13,8 @@
 
     console.log('MoodleLoginTU script loaded'); // Basic log to check if the script runs
 
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM fully loaded and parsed');
+    window.onload = function() {
+        console.log('Window fully loaded');
 
         // Function to prompt for credentials
         function promptForCredentials() {
@@ -105,5 +105,5 @@
                 }
             }, 100);
         }
-    });
+    };
 })();
