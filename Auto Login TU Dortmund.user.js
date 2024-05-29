@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MoodleLoginTU
 // @namespace    http://tampermonkey.net/
-// @version      0.6
+// @version      0.7
 // @description  Script to auto login into Moodle of the TU Dortmund
 // @match        https://moodle.tu-dortmund.de/*
 // @match        https://sso.itmc.tu-dortmund.de/*
@@ -11,7 +11,7 @@
 (function() {
     'use strict';
 
-    console.log('MoodleLoginTU script loaded'); // Basic log to check if the script runs
+    console.log('MoodleLoginTU script loaded');
 
     function handlePageLoad() {
         console.log('Page load handled');
@@ -22,21 +22,30 @@
             const password = prompt("Enter your TU Dortmund password:");
 
             if (username && password) {
-                localStorage.setItem('tuDortmundUsername', username);
-                localStorage.setItem('tuDortmundPassword', password);
+                setCookie('tuDortmundUsername', username, 365);
+                setCookie('tuDortmundPassword', password, 365);
             } else {
                 alert('Username and password are required to login.');
             }
         }
 
-        // Retrieve credentials from local storage
-        function getCredentials() {
-            const username = localStorage.getItem('tuDortmundUsername');
-            const password = localStorage.getItem('tuDortmundPassword');
-            return { username, password };
+        // Functions to get and set cookies
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
         }
 
-        const { username, password } = getCredentials();
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = `expires=${date.toUTCString()}`;
+            document.cookie = `${name}=${value}; ${expires}; path=/`;
+        }
+
+        // Retrieve credentials from cookies
+        const username = getCookie('tuDortmundUsername');
+        const password = getCookie('tuDortmundPassword');
 
         // If credentials are not stored, prompt for them
         if (!username || !password) {
@@ -107,7 +116,7 @@
                             ssoLoginButton.click();
                         });
                     } else {
-                        console.log('Credentials not found in local storage');
+                        console.log('Credentials not found in cookies');
                     }
                 } else {
                     console.log('Username or password field not found');
