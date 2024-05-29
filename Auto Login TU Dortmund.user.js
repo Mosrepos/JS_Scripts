@@ -90,7 +90,7 @@
 
                     if (userField.value !== "" && passField.value !== "") {
                         console.log('Both fields filled, looking for login button');
-                        let ssoLoginButton = document.querySelector('.btn-primary, button[type="submit"]');
+                        let ssoLoginButton = document.querySelector('#loginButton_0');
                         console.log('SSO login button:', ssoLoginButton);
                         if (ssoLoginButton) {
                             console.log('Login button found, clicking it');
