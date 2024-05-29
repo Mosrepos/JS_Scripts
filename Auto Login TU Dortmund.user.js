@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         MoodleLoginTU
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  Script to auto login into moodle of the TU Dortmund
+// @version      0.2
+// @description  Script to auto login into Moodle of the TU Dortmund
 // @author       Mohamad Abdo
-// @match       *://*/*
+// @match        https://moodle.tu-dortmund.de/*
+// @match        https://sso.itmc.tu-dortmund.de/*
 // @grant        none
 // ==/UserScript==
+
 (function() {
     'use strict';
 
@@ -36,10 +38,11 @@
         }
 
         // Handle Moodle homepage and redirect to login
-        if (window.location.href === "https://moodle.tu-dortmund.de/?redirect=0") {
-            console.log('On Moodle homepage, clicking login button');
-            let loginButton = document.querySelector('a.btn-login');
+        if (window.location.href.includes("https://moodle.tu-dortmund.de/?redirect=0")) {
+            console.log('On Moodle homepage, looking for login button');
+            let loginButton = document.querySelector('#usernavigation > div.d-flex.align-items-stretch.usermenu-container > div > span > a');
             if (loginButton) {
+                console.log('Login button found, clicking it');
                 loginButton.click();
             } else {
                 console.log('Login button not found on Moodle homepage');
@@ -47,10 +50,11 @@
         }
 
         // Handle Moodle login page and redirect to SSO
-        if (window.location.href === "https://moodle.tu-dortmund.de/login/index.php") {
-            console.log('On Moodle login page, clicking UniAccount login button');
-            let uniAccountButton = document.querySelector('.btn-primary');
+        if (window.location.href.includes("https://moodle.tu-dortmund.de/login/index.php")) {
+            console.log('On Moodle login page, looking for UniAccount login button');
+            let uniAccountButton = document.querySelector('#region-main > div > div > div > div > div:nth-child(2) > p:nth-child(3) > a');
             if (uniAccountButton) {
+                console.log('UniAccount login button found, clicking it');
                 uniAccountButton.click();
             } else {
                 console.log('UniAccount login button not found on Moodle login page');
@@ -76,9 +80,10 @@
                     }
 
                     if (userField.value !== "" && passField.value !== "") {
-                        console.log('Both fields filled, clicking login button');
-                        let ssoLoginButton = document.querySelector('.btn-primary');
+                        console.log('Both fields filled, looking for login button');
+                        let ssoLoginButton = document.querySelector('.btn-primary, button[type="submit"]');
                         if (ssoLoginButton) {
+                            console.log('Login button found, clicking it');
                             ssoLoginButton.click();
                         } else {
                             console.log('Login button not found on SSO login page');
