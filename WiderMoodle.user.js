@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        WiderMoodle
 // @description This is your new file, start writing code
-// @match       *://*/*
+// @match        https://moodle.tu-dortmund.de/*
 // ==/UserScript==
 (function() {
     function applyStyles() {
