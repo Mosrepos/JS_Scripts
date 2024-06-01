@@ -2,6 +2,8 @@
 // @name        DarkMode
 // @description This script applies a dark theme to the webpage
 // @match       *://*/*
+// @exclude     *://moodle.tu-dortmund.de/*
+// @exclude     *://*.moodle.tu-dortmund.de/*
 // @grant       none
 // ==/UserScript==
 
