@@ -11,10 +11,8 @@
 (function() {
     'use strict';
 
-    console.log('MoodleLoginTU script loaded');
 
     function handlePageLoad() {
-        console.log('Page load handled');
 
         // Function to prompt for credentials
         function promptForCredentials() {
@@ -52,9 +50,6 @@
             promptForCredentials();
         }
 
-        // Log current URL
-        console.log('Current URL:', window.location.href);
-
         // Function to interact with element when it becomes available
         function waitForElement(selector, callback) {
             const element = document.querySelector(selector);
@@ -74,7 +69,6 @@
 
         // Handle Moodle homepage and redirect to login
         if (window.location.href.includes("https://moodle.tu-dortmund.de/?redirect=0")) {
-            console.log('On Moodle homepage, looking for login button');
             waitForElement('#usernavigation > div.d-flex.align-items-stretch.usermenu-container > div > span > a', (loginButton) => {
                 console.log('Login button found, clicking it');
                 loginButton.click();
@@ -83,7 +77,6 @@
 
         // Handle Moodle login page and redirect to SSO
         if (window.location.href.includes("https://moodle.tu-dortmund.de/login/index.php")) {
-            console.log('On Moodle login page, looking for UniAccount login button');
             waitForElement('#region-main > div > div > div > div > div:nth-child(2) > p:nth-child(3) > a', (uniAccountButton) => {
                 console.log('UniAccount login button found, clicking it');
                 uniAccountButton.click();
@@ -92,7 +85,6 @@
 
         // Handle SSO login page
         if (window.location.href.startsWith("https://sso.itmc.tu-dortmund.de/openam/XUI/?realm=/tudo&goto=")) {
-            console.log('On SSO login page');
             waitForElement('#idToken1', (userField) => {
                 const passField = document.querySelector('#idToken2');
                 console.log('Username field:', userField);
