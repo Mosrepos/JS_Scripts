@@ -1,128 +1,164 @@
 // ==UserScript==
-// @name         MoodleLoginTU
+// @name         Moodle Auto Login TU Dortmund
 // @namespace    http://tampermonkey.net/
-// @version      0.7
-// @description  Script to auto login into Moodle of the TU Dortmund
+// @version      1.0
+// @description  Automatic login for TU Dortmund Moodle
 // @match        https://moodle.tu-dortmund.de/*
 // @match        https://sso.itmc.tu-dortmund.de/*
 // @grant        none
 // ==/UserScript==
 
 (function() {
-    'use strict';
+'use strict';
+
+/* ----------------------------- */
+/* Prevent script running twice  */
+/* ----------------------------- */
+
+if (window.__moodleAutoLoginLoaded) return;
+window.__moodleAutoLoginLoaded = true;
 
 
-    function handlePageLoad() {
+/* ----------------------------- */
+/* Credential storage            */
+/* ----------------------------- */
 
-        // Function to prompt for credentials
-        function promptForCredentials() {
-            const username = prompt("Enter your TU Dortmund username:");
-            const password = prompt("Enter your TU Dortmund password:");
+let username = localStorage.getItem("tudo_user");
+let password = localStorage.getItem("tudo_pass");
 
-            if (username && password) {
-                setCookie('tuDortmundUsername', username, 365);
-                setCookie('tuDortmundPassword', password, 365);
-            } else {
-                alert('Username and password are required to login.');
-            }
-        }
+if (!username || !password) {
 
-        // Functions to get and set cookies
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
+    username = prompt("TU Dortmund Username:");
+    password = prompt("TU Dortmund Password:");
 
-        function setCookie(name, value, days) {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            const expires = `expires=${date.toUTCString()}`;
-            document.cookie = `${name}=${value}; ${expires}; path=/`;
-        }
+    if (username && password) {
 
-        // Retrieve credentials from cookies
-        const username = getCookie('tuDortmundUsername');
-        const password = getCookie('tuDortmundPassword');
+        localStorage.setItem("tudo_user", username);
+        localStorage.setItem("tudo_pass", password);
 
-        // If credentials are not stored, prompt for them
-        if (!username || !password) {
-            promptForCredentials();
-        }
+    } else {
 
-        // Function to interact with element when it becomes available
-        function waitForElement(selector, callback) {
-            const element = document.querySelector(selector);
-            if (element) {
-                callback(element);
-            } else {
-                const observer = new MutationObserver((mutationsList, observer) => {
-                    const element = document.querySelector(selector);
-                    if (element) {
-                        observer.disconnect();
-                        callback(element);
-                    }
-                });
-                observer.observe(document.body, { childList: true, subtree: true });
-            }
-        }
+        alert("Username and password required.");
+        return;
 
-        // Handle Moodle homepage and redirect to login
-        if (window.location.href.includes("https://moodle.tu-dortmund.de/?redirect=0")) {
-            waitForElement('#usernavigation > div.d-flex.align-items-stretch.usermenu-container > div > span > a', (loginButton) => {
-                console.log('Login button found, clicking it');
-                loginButton.click();
-            });
-        }
+    }
+}
 
-        // Handle Moodle login page and redirect to SSO
-        if (window.location.href.includes("https://moodle.tu-dortmund.de/login/index.php")) {
-            waitForElement('#region-main > div > div > div > div > div:nth-child(2) > p:nth-child(3) > a', (uniAccountButton) => {
-                console.log('UniAccount login button found, clicking it');
-                uniAccountButton.click();
-            });
-        }
 
-        // Handle SSO login page
-        if (window.location.href.startsWith("https://sso.itmc.tu-dortmund.de/openam/XUI/?realm=/tudo&goto=")) {
-            waitForElement('#idToken1', (userField) => {
-                const passField = document.querySelector('#idToken2');
-                console.log('Username field:', userField);
-                console.log('Password field:', passField);
+/* ----------------------------- */
+/* Wait for element helper       */
+/* ----------------------------- */
 
-                if (userField && passField) {
-                    console.log('Found username and password fields');
-                    if (username && password) {
-                        userField.value = username;
-                        console.log('Filled in username');
-                        passField.value = password;
-                        console.log('Filled in password');
+function waitForElement(selector, callback) {
 
-                        // Trigger change events to ensure the values are recognized by the page
-                        userField.dispatchEvent(new Event('input', { bubbles: true }));
-                        passField.dispatchEvent(new Event('input', { bubbles: true }));
+    const element = document.querySelector(selector);
 
-                        console.log('Both fields filled, looking for login button');
-                        waitForElement('#loginButton_0', (ssoLoginButton) => {
-                            console.log('SSO login button found, clicking it');
-                            ssoLoginButton.click();
-                        });
-                    } else {
-                        console.log('Credentials not found in cookies');
-                    }
-                } else {
-                    console.log('Username or password field not found');
-                }
-            });
-        }
+    if (element) {
+        callback(element);
+        return;
     }
 
-    // Use both DOMContentLoaded and window.onload to ensure the script runs
-    document.addEventListener('DOMContentLoaded', handlePageLoad);
-    window.addEventListener('load', handlePageLoad);
+    const observer = new MutationObserver(() => {
 
-    // Check if the page is already loaded
-    if (document.readyState === 'complete') {
-        handlePageLoad();
-    }
+        const element = document.querySelector(selector);
+
+        if (element) {
+            observer.disconnect();
+            callback(element);
+        }
+
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
+
+/* ----------------------------- */
+/* 1. Moodle homepage login      */
+/* ----------------------------- */
+
+if (location.hostname === "moodle.tu-dortmund.de" &&
+    location.href.includes("redirect=0")) {
+
+    waitForElement(
+        '#usernavigation a',
+        (btn) => {
+
+            console.log("Moodle login button clicked");
+            btn.click();
+
+        }
+    );
+}
+
+
+/* ----------------------------- */
+/* 2. Moodle UniAccount button   */
+/* ----------------------------- */
+
+if (location.pathname === "/login/index.php") {
+
+    waitForElement(
+        '#region-main a',
+        (btn) => {
+
+            console.log("UniAccount login clicked");
+            btn.click();
+
+        }
+    );
+}
+
+
+/* ----------------------------- */
+/* 3. Skip TOTP registration     */
+/* ----------------------------- */
+
+if (location.hostname === "sso.itmc.tu-dortmund.de") {
+
+    waitForElement(
+        'input[value="Login ohne Registrierung"]',
+        (btn) => {
+
+            console.log("Skipping TOTP registration");
+            btn.click();
+
+        }
+    );
+}
+
+
+/* ----------------------------- */
+/* 4. Fill SSO login form        */
+/* ----------------------------- */
+
+if (location.href.includes("openam")) {
+
+    waitForElement("#idToken1", (userField) => {
+
+        const passField = document.querySelector("#idToken2");
+
+        if (!passField) return;
+
+        console.log("Filling login credentials");
+
+        userField.value = username;
+        passField.value = password;
+
+        userField.dispatchEvent(new Event("input", { bubbles:true }));
+        passField.dispatchEvent(new Event("input", { bubbles:true }));
+
+        waitForElement("#loginButton_0", (btn) => {
+
+            console.log("Submitting login");
+            btn.click();
+
+        });
+
+    });
+}
+
 })();
